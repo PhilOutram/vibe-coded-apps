@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sticky Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5efe6;
+    --surface: #fffdf7;
+    --ink: #2c2416;
+    --ink-muted: #8a7d6b;
+    --accent: #e85d3a;
+    --shadow: rgba(44,36,22,0.12);
+    --note-0: #fff9c4;
+    --note-1: #ffd6d6;
+    --note-2: #d4f1d4;
+    --note-3: #cce5ff;
+    --note-4: #f5d0fe;
+    --note-5: #ffddb4;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background-color: var(--bg);
+    min-height: 100vh;
+    color: var(--ink);
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(232,93,58,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(245,166,35,0.08) 0%, transparent 50%);
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 2px solid rgba(44,36,22,0.08);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 20px var(--shadow);
+    height: 60px;
+  }
+
+  .logo {
+    font-family: 'Caveat', cursive;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+  }
+
+  .logo-pin {
+    width: 11px; height: 11px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(232,93,58,0.2);
+  }
+
+  .header-right { display: flex; align-items: center; gap: 16px; }
+
+  .note-count {
+    font-size: 13px;
+    color: var(--ink-muted);
+    user-select: none;
+  }
+
+  .add-btn {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 9px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(44,36,22,0.25);
+    user-select: none;
+  }
+
+  .add-btn:hover {
+    background: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(232,93,58,0.4);
+  }
+
+  .add-btn:active { transform: translateY(0); }
+  .add-btn svg { transition: transform 0.2s; }
+  .add-btn:hover svg { transform: rotate(90deg); }
+
+  #canvas {
+    position: relative;
+    top: 60px;
+    min-height: calc(100vh - 60px);
+    width: 100%;
+  }
+
+  .empty-state {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .empty-icon {
+    font-size: 60px;
+    opacity: 0.35;
+    animation: sway 3s ease-in-out infinite;
+  }
+
+  @keyframes sway {
+    0%, 100% { transform: rotate(-3deg); }
+    50%       { transform: rotate(3deg); }
+  }
+
+  .empty-state h2 {
+    font-family: 'Caveat', cursive;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--ink-muted);
+  }
+
+  .empty-state p {
+    font-size: 14px;
+    color: var(--ink-muted);
+    max-width: 250px;
+    line-height: 1.6;
+  }
+
+  .note {
+    position: absolute;
+    width: 240px;
+    border-radius: 3px;
+    box-shadow: 3px 4px 16px var(--shadow), 1px 1px 0 rgba(255,255,255,0.8) inset;
+    display: flex;
+    flex-direction: column;
+    animation: noteIn 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    transition: box-shadow 0.18s ease;
+    will-change: left, top;
+  }
+
+  @keyframes noteIn {
+    from { opacity: 0; transform: scale(0.82) rotate(-3deg); }
+    to   { opacity: 1; transform: scale(1)   rotate(0deg); }
+  }
+
+  .note.is-dragging {
+    box-shadow: 12px 18px 44px rgba(44,36,22,0.3) !important;
+    z-index: 500 !important;
+    animation: none;
+    transform: rotate(2deg) scale(1.05) !important;
+    transition: none !important;
+    cursor: grabbing !important;
+  }
+
+  .note[data-color="0"] { background: var(--note-0); }
+  .note[data-color="1"] { background: var(--note-1); }
+  .note[data-color="2"] { background: var(--note-2); }
+  .note[data-color="3"] { background: var(--note-3); }
+  .note[data-color="4"] { background: var(--note-4); }
+  .note[data-color="5"] { background: var(--note-5); }
+
+  .note-tape {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 48px; height: 22px;
+    background: rgba(255,255,255,0.55);
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    backdrop-filter: blur(2px);
+    cursor: grab;
+    z-index: 2;
+  }
+
+  .note-tape:active { cursor: grabbing; }
+
+  .note-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 14px 6px;
+    cursor: grab;
+    user-select: none;
+  }
+
+  .note-header:active { cursor: grabbing; }
+
+  .drag-dots {
+    display: grid;
+    grid-template-columns: repeat(3, 4px);
+    gap: 3px;
+    opacity: 0.22;
+    padding: 2px;
+  }
+
+  .drag-dots span {
+    display: block;
+    width: 3px; height: 3px;
+    background: var(--ink);
+    border-radius: 50%;
+  }
+
+  .note-date {
+    font-size: 11px;
+    color: rgba(44,36,22,0.4);
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    flex: 1;
+    text-align: center;
+  }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(44,36,22,0.3);
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    line-height: 1;
+  }
+
+  .delete-btn:hover {
+    color: var(--accent);
+    background: rgba(232,93,58,0.1);
+    transform: scale(1.1);
+  }
+
+  .note-body { padding: 2px 16px 14px; flex: 1; }
+
+  .note-text {
+    font-family: 'Caveat', cursive;
+    font-size: 19px;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--ink);
+    width: 100%;
+    min-height: 80px;
+    background: none;
+    border: none;
+    resize: none;
+    outline: none;
+    cursor: text;
+    caret-color: var(--accent);
+    overflow: hidden;
+  }
+
+  .note-text::placeholder { color: rgba(44,36,22,0.25); font-style: italic; }
+
+  .note-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 14px 12px;
+  }
+
+  .colors-list { display: flex; gap: 5px; align-items: center; }
+
+  .color-dot {
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    opacity: 0.6;
+  }
+
+  .color-dot:hover { transform: scale(1.3); opacity: 1; }
+  .color-dot.active { transform: scale(1.2); opacity: 1; box-shadow: 0 0 0 2px rgba(44,36,22,0.35); }
+
+  @media (max-width: 500px) {
+    header { padding: 12px 14px; }
+    .logo { font-size: 22px; }
+    .add-btn span { display: none; }
+    .add-btn { padding: 9px 12px; }
+    .note { width: 160px; }
+    .note-text { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-pin"></div>
+    Sticky Notes
+  </div>
+  <div class="header-right">
+    <span class="note-count" id="noteCount"></span>
+    <button class="add-btn" id="addBtn">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+        <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>New Note</span>
+    </button>
+  </div>
+</header>
+
+<div id="canvas">
+  <div id="emptyState" class="empty-state">
+    <div class="empty-icon">📝</div>
+    <h2>No notes yet</h2>
+    <p>Click "New Note" to jot something down. Drag by the header or tape to reposition.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  const COLORS = ['#fff9c4','#ffd6d6','#d4f1d4','#cce5ff','#f5d0fe','#ffddb4'];
+  const PLACEHOLDERS = [
+    'Jot something down\u2026',
+    'What\'s on your mind?',
+    'Add a thought\u2026',
+    'Don\'t forget\u2026',
+    'Important!',
+    'Idea\u2026',
+  ];
+  const STORAGE_KEY = 'sticky-notes-v3';
+  const HEADER_H = 60;
+
+  function noteW() { return window.innerWidth <= 500 ? 160 : 240; }
+
+  let notes = [];
+  let topZ  = 10;
+  let drag  = null;
+
+  /* ── Persistence ── */
+  function load() {
+    try { notes = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch { notes = []; }
+  }
+
+  function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+    const c = document.getElementById('noteCount');
+    c.textContent = notes.length ? notes.length + ' note' + (notes.length !== 1 ? 's' : '') : '';
+    document.getElementById('emptyState').style.display = notes.length ? 'none' : 'flex';
+  }
+
+  /* ── Spawn position: just below the lowest existing note ── */
+  function spawnPos() {
+    var pad = 32;
+    var nw  = noteW();
+    var gap = 20;
+
+    // Find the bottom edge of every rendered note
+    var els = document.querySelectorAll('#canvas .note');
+    var lowestBottom = HEADER_H + 40; // default when canvas is empty
+    els.forEach(function(el) {
+      var bottom = el.offsetTop + el.offsetHeight;
+      if (bottom > lowestBottom) lowestBottom = bottom;
+    });
+
+    // Spread across columns so stacked notes don't perfectly overlap
+    var cols = Math.max(1, Math.floor((window.innerWidth - pad * 2) / (nw + gap)));
+    var col  = notes.length % cols;
+    var x    = pad + col * (nw + gap);
+    var y    = lowestBottom + gap;
+
+    return { x: x, y: y };
+  }
+
+  /* ── Add note ── */
+  function addNote() {
+    const pos  = spawnPos();
+    const note = {
+      id:      Date.now(),
+      text:    '',
+      color:   Math.floor(Math.random() * COLORS.length),
+      created: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+      x: pos.x, y: pos.y,
+      z: ++topZ,
+    };
+    notes.unshift(note);
+    save();
+    const el = buildEl(note, true);
+    document.getElementById('canvas').appendChild(el);
+    setTimeout(function() { el.querySelector('.note-text').focus(); }, 40);
+  }
+
+  /* ── Build DOM element ── */
+  function buildEl(note, isNew) {
+    const el = document.createElement('div');
+    el.className   = 'note';
+    el.dataset.id  = note.id;
+    el.dataset.color = note.color;
+    el.style.left  = note.x + 'px';
+    el.style.top   = note.y + 'px';
+    el.style.zIndex = note.z || 10;
+    if (!isNew) el.style.animation = 'none';
+
+    const dotsHtml = '<div class="drag-dots">' + '<span></span>'.repeat(6) + '</div>';
+
+    const colorDotsHtml = COLORS.map(function(c, ci) {
+      return '<div class="color-dot' + (ci === note.color ? ' active' : '') +
+             '" data-ci="' + ci + '" style="background:' + c + '" title="Change colour"></div>';
+    }).join('');
+
+    el.innerHTML =
+      '<div class="note-tape"></div>' +
+      '<div class="note-header">' +
+        dotsHtml +
+        '<span class="note-date">' + note.created + '</span>' +
+        '<button class="delete-btn" title="Delete">' +
+          '<svg width="13" height="13" viewBox="0 0 14 14" fill="none">' +
+            '<path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' +
+          '</svg>' +
+        '</button>' +
+      '</div>' +
+      '<div class="note-body">' +
+        '<textarea class="note-text" placeholder="' + PLACEHOLDERS[notes.length % PLACEHOLDERS.length] + '">' +
+          escHtml(note.text) +
+        '</textarea>' +
+      '</div>' +
+      '<div class="note-footer"><div class="colors-list">' + colorDotsHtml + '</div></div>';
+
+    /* textarea */
+    var ta = el.querySelector('.note-text');
+    autoResize(ta);
+    ta.addEventListener('input', function() {
+      autoResize(ta);
+      updateField(note.id, 'text', ta.value);
+    });
+    /* prevent drag when interacting with textarea */
+    ta.addEventListener('mousedown',  function(e) { e.stopPropagation(); });
+    ta.addEventListener('touchstart', function(e) { e.stopPropagation(); }, { passive: true });
+
+    /* delete */
+    el.querySelector('.delete-btn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      deleteNote(note.id, el);
+    });
+
+    /* colour dots */
+    el.querySelectorAll('.color-dot').forEach(function(dot) {
+      dot.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var ci = parseInt(dot.dataset.ci);
+        updateField(note.id, 'color', ci);
+        el.dataset.color = ci;
+        el.querySelectorAll('.color-dot').forEach(function(d) {
+          d.classList.toggle('active', parseInt(d.dataset.ci) === ci);
+        });
+      });
+    });
+
+    /* drag handles: header + tape */
+    [el.querySelector('.note-header'), el.querySelector('.note-tape')].forEach(function(handle) {
+      handle.addEventListener('mousedown',  function(e) { startDrag(e, el, note); });
+      handle.addEventListener('touchstart', function(e) { startDrag(e, el, note); }, { passive: false });
+    });
+
+    /* bring to front on any press */
+    el.addEventListener('mousedown',  function() { bringToFront(el, note); });
+    el.addEventListener('touchstart', function() { bringToFront(el, note); }, { passive: true });
+
+    return el;
+  }
+
+  /* ── Drag ── */
+  function startDrag(e, el, note) {
+    if (e.target.closest('textarea, button, .color-dot')) return;
+    e.preventDefault();
+
+    bringToFront(el, note);
+
+    var touch = e.touches ? e.touches[0] : e;
+    var rect  = el.getBoundingClientRect();
+
+    drag = {
+      el:   el,
+      note: note,
+      ox:   touch.clientX - rect.left,
+      oy:   touch.clientY - rect.top,
+    };
+
+    el.classList.add('is-dragging');
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup',   stopDrag);
+    document.addEventListener('touchmove', onMove,    { passive: false });
+    document.addEventListener('touchend',  stopDrag);
+  }
+
+  function onMove(e) {
+    if (!drag) return;
+    e.preventDefault();
+    var touch  = e.touches ? e.touches[0] : e;
+    var canvas = document.getElementById('canvas');
+    var cr     = canvas.getBoundingClientRect();
+    var nw     = noteW();
+
+    var x = touch.clientX - cr.left - drag.ox;
+    var y = touch.clientY - cr.top  - drag.oy;
+
+    /* soft boundary — allow slight overhang but not full loss */
+    x = Math.max(-(nw * 0.4), x);
+    y = Math.max(0, y);
+
+    drag.el.style.left  = x + 'px';
+    drag.el.style.top   = y + 'px';
+    drag.note.x = x;
+    drag.note.y = y;
+  }
+
+  function stopDrag() {
+    if (!drag) return;
+    drag.el.classList.remove('is-dragging');
+    save();
+    drag = null;
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup',   stopDrag);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend',  stopDrag);
+  }
+
+  function bringToFront(el, note) {
+    note.z     = ++topZ;
+    el.style.zIndex = note.z;
+  }
+
+  /* ── Helpers ── */
+  function updateField(id, field, value) {
+    var note = notes.find(function(n) { return n.id === id; });
+    if (note) { note[field] = value; save(); }
+  }
+
+  function deleteNote(id, el) {
+    el.style.transition = 'all 0.22s ease';
+    el.style.transform  = 'scale(0.75) rotate(6deg)';
+    el.style.opacity    = '0';
+    setTimeout(function() {
+      el.remove();
+      notes = notes.filter(function(n) { return n.id !== id; });
+      save();
+    }, 220);
+  }
+
+  function autoResize(ta) {
+    ta.style.height = 'auto';
+    ta.style.height = ta.scrollHeight + 'px';
+  }
+
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /* ── Boot ── */
+  load();
+  if (notes.length) {
+    topZ = Math.max.apply(null, notes.map(function(n) { return n.z || 10; }));
+  }
+
+  var canvas = document.getElementById('canvas');
+  document.getElementById('emptyState').style.display = notes.length ? 'none' : 'flex';
+  notes.forEach(function(note) { canvas.appendChild(buildEl(note, false)); });
+
+  document.getElementById('noteCount').textContent =
+    notes.length ? notes.length + ' note' + (notes.length !== 1 ? 's' : '') : '';
+
+  document.getElementById('addBtn').addEventListener('click', addNote);
+})();
+</script>
+</body>
+</html>
