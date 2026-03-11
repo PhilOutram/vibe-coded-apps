@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Apps</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;600&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #e8e8e8;
+      --muted: #666;
+      --accent: #c8f060;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 80px 24px;
+    }
+
+    header {
+      text-align: left;
+      width: 100%;
+      max-width: 560px;
+      margin-bottom: 56px;
+    }
+
+    header .label {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    h1 span {
+      font-weight: 600;
+    }
+
+    .subtitle {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    ul {
+      list-style: none;
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    li a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    li a:hover {
+      background: #222;
+      border-color: var(--accent);
+    }
+
+    li a:hover .arrow {
+      color: var(--accent);
+      transform: translateX(3px);
+    }
+
+    .app-name {
+      font-size: 15px;
+      font-weight: 400;
+    }
+
+    .app-desc {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .arrow {
+      font-size: 18px;
+      color: var(--border);
+      transition: color 0.15s, transform 0.15s;
+    }
+
+    footer {
+      margin-top: 72px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="label">vibe-coded</div>
+    <h1>My <span>Apps</span></h1>
+    <p class="subtitle">A growing collection of things I built.</p>
+  </header>
+
+  <ul>
+    <!-- Add or edit apps below -->
+
+    <li>
+      <a href="https://yourusername.github.io/app-one">
+        <div>
+          <div class="app-name">App One</div>
+          <div class="app-desc">Short description goes here</div>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+    </li>
+
+    <li>
+      <a href="https://yourusername.github.io/app-two">
+        <div>
+          <div class="app-name">App Two</div>
+          <div class="app-desc">Short description goes here</div>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+    </li>
+
+    <li>
+      <a href="https://yourusername.github.io/app-three">
+        <div>
+          <div class="app-name">App Three</div>
+          <div class="app-desc">Short description goes here</div>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+    </li>
+
+    <li>
+      <a href="https://yourusername.github.io/app-four">
+        <div>
+          <div class="app-name">App Four</div>
+          <div class="app-desc">Short description goes here</div>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+    </li>
+
+  </ul>
+
+  <footer>// more apps incoming</footer>
+
+</body>
+</html>
