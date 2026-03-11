@@ -107,6 +107,28 @@
       margin-top: 3px;
     }
 
+    .app-thumb {
+      width: 52px;
+      height: 52px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--border);
+    }
+
+    .app-thumb-placeholder {
+      width: 52px;
+      height: 52px;
+      border-radius: 8px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    .app-info {
+      flex: 1;
+      padding: 0 16px;
+    }
+
     .arrow {
       font-size: 18px;
       color: var(--border);
@@ -134,6 +156,7 @@
 
     <li>
       <a href="https://philoutram.github.io/vibe-coded-apps/sticky-notes.html">
+        <img class="app-thumb" src="sticky-notes.jpg" alt="Sticky notes thumbnail">
         <div>
           <div class="app-name">Sticky Notes</div>
           <div class="app-desc">Simple app to collect and manage thoughts and todos</div>
@@ -144,7 +167,8 @@
 
     <li>
       <a href="https://philoutram.github.io/app-two">
-        <div>
+        <div class="app-thumb-placeholder"></div>
+        <div class="app-info">
           <div class="app-name">App Two</div>
           <div class="app-desc">Short description goes here</div>
         </div>
@@ -154,7 +178,8 @@
 
     <li>
       <a href="https://philoutram.github.io/app-three">
-        <div>
+        <div class="app-thumb-placeholder"></div>
+        <div class="app-info">
           <div class="app-name">App Three</div>
           <div class="app-desc">Short description goes here</div>
         </div>
@@ -164,7 +189,8 @@
 
     <li>
       <a href="https://philoutram.github.io/app-four">
-        <div>
+        <div class="app-thumb-placeholder"></div>
+        <div class="app-info">
           <div class="app-name">App Four</div>
           <div class="app-desc">Short description goes here</div>
         </div>
