@@ -1,0 +1,170 @@
+:root {
+    --bg-color: #f0f8ff; /* AliceBlue */
+    --text-color: #2c3e50;
+    --primary-color: #3498db;
+    --secondary-color: #e74c3c;
+    --accent-color: #f1c40f;
+    --card-bg: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Quicksand', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-image: radial-gradient(circle at 50% 50%, #e0f7fa 0%, var(--bg-color) 100%);
+}
+
+#game-container {
+    background-color: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    border: 4px solid var(--primary-color);
+    transition: transform 0.3s ease;
+}
+
+#image-container {
+    width: 100%;
+    height: 400px;
+    background-color: #dde1e7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#scene-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+#story-container {
+    padding: 30px 40px;
+    text-align: center;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#story-text {
+    font-size: 1.5rem;
+    line-height: 1.6;
+    font-weight: 700;
+    color: var(--text-color);
+    animation: slideUp 0.5s ease;
+}
+
+#choices-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 0 40px 40px;
+    justify-content: center;
+}
+
+.choice-btn {
+    flex: 1;
+    min-width: 250px;
+    padding: 15px 20px;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 0px #2980b9;
+}
+
+.choice-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0px #2980b9;
+    background-color: #3aa1e4;
+}
+
+.choice-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0px #2980b9;
+}
+
+/* Secondary choice styling */
+.choice-btn:nth-child(2) {
+    background-color: var(--secondary-color);
+    box-shadow: 0 4px 0px #c0392b;
+}
+
+.choice-btn:nth-child(2):hover {
+    box-shadow: 0 6px 0px #c0392b;
+    background-color: #e95949;
+}
+
+.choice-btn:nth-child(2):active {
+    box-shadow: 0 2px 0px #c0392b;
+}
+
+/* Tertiary choice styling */
+.choice-btn:nth-child(3) {
+    background-color: #27ae60;
+    box-shadow: 0 4px 0px #2ecc71;
+}
+
+#sound-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--card-bg);
+    border: 3px solid var(--accent-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+    z-index: 100;
+}
+
+#sound-toggle:hover {
+    transform: scale(1.1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+    #image-container {
+        height: 250px;
+    }
+    #story-text {
+        font-size: 1.2rem;
+    }
+    .choice-btn {
+        min-width: 100%;
+    }
+}
